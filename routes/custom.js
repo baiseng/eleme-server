@@ -114,7 +114,9 @@ router.get('/list', (req, res) => {
     if (type === 1) {
         db.Store.findOne({where:{userId:req.userId}}).then(store=>{
             if (store) {
-                res.json({ok:1,customList:store.getCustom()})
+                store.getCustoms().then(customList=>{
+                    res.json({ok:1,customList})
+                });
             }else {
                 res.json({ok:-1,msg:'您没有店铺'})
             }
@@ -122,7 +124,9 @@ router.get('/list', (req, res) => {
     }else if (type === 2 && storeId) {
         db.Store.findOne({where:{id:storeId}}).then(store=>{
             if (store) {
-                res.json({ok:1,customList:store.getCustom()})
+                store.getCustoms().then(customList=>{
+                res.json({ok:1,customList})
+                });
             }else {
                 res.json({ok:-1,msg:'没有此店铺,店铺id有点问题'})
             }

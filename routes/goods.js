@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../models/table');
 const sliceObj = require('../tools/sliceObj');
-const UnFile=require('../tools/UnFile');
+const UnFile = require('../tools/UnFile');
 
 
 /*根拦截器
@@ -67,7 +67,7 @@ router.delete('/', (req, res) => {
                 if (store) {
                     db.Goods.findOne({where: {id: req.body.id, storeId: store.id}}).then(goods => {
                         if (goods) {
-                            goods.online=!goods.online;
+                            goods.online = !goods.online;
                             goods.save();
                             res.json({ok: 1, goods})
                         } else {
@@ -95,16 +95,18 @@ router.post('/alter', (req, res) => {
         if (req.body.id) {
             db.Store.findOne({where: {userId: req.userId}}).then(store => {
                 if (store) {
-                    db.Goods.findOne({where:{id: req.body.id, storeId: store.id}}).then(goods=>{
+                    db.Goods.findOne({where: {id: req.body.id, storeId: store.id}}).then(goods => {
                         if (goods) {
                             let data = sliceObj(req.body, ['name', 'price', 'desc', 'imgUrl', 'stock', 'customId', 'isDiscount', 'original', 'goodsTypeId', 'storeId']);
-                            if (data.imgUrl){
+                            if (data.imgUrl) {
                                 UnFile(goods.imgUrl)
                             }
-                            Object.assign(goods,data);
-                            goods.save().then(()=>{res.json({ok:1,msg:'修改成功'})});
-                        }else {
-                            res.json({ok:-1,msg:'不存在此商品，或者不属于你店铺'})
+                            Object.assign(goods, data);
+                            goods.save().then(() => {
+                                res.json({ok: 1, msg: '修改成功'})
+                            });
+                        } else {
+                            res.json({ok: -1, msg: '不存在此商品，或者不属于你店铺'})
                         }
                     });
                 } else {
@@ -134,7 +136,9 @@ router.get('/listByCustomId', (req, res) => {
                 if (store) {
                     db.Custom.findOne({where: {storeId: store.id, id: customId}}).then(custom => {
                         if (custom) {
-                            res.json({ok: 1, goodsList: custom.getGoods(), msg: '获取本店某类商品列表'});
+                            custom.getGoods().then(goodsList => {
+                                res.json({ok: 1, goodsList, msg: '获取本店某类商品列表'});
+                            });
                         } else {
                             res.json({ok: -1, msg: '没有此自定义分类'})
                         }
@@ -145,11 +149,11 @@ router.get('/listByCustomId', (req, res) => {
             })
         } else if (type === 2) {
             if (storeId) {
-                db.Goods.findAll({where: {storeId,customId}}).then(goodsList=>{
+                db.Goods.findAll({where: {storeId, customId}}).then(goodsList => {
                     if (goodsList.length) {
-                        res.json({ok:1,goodsList})
-                    }else{
-                        res.json({ok:-1,msg:'要么该类无数据，要么storeId、customId有问题'})
+                        res.json({ok: 1, goodsList})
+                    } else {
+                        res.json({ok: -1, msg: '要么该类无数据，要么storeId、customId有问题'})
                     }
                 })
             } else {
@@ -175,7 +179,9 @@ router.get('/listByStoreId', (req, res) => {
         if (req.userType === 2) {
             db.Store.findOne({where: {userId: req.userId}}).then(store => {
                 if (store) {
-                    res.json({ok: 1, goodsList: store.getGoods()});
+                    store.getGoods().then(goodsList => {
+                        res.json({ok: 1, goodsList});
+                    });
                 } else {
                     res.json({ok: -1, msg: '您还没有店铺，何来自己店铺商品'})
                 }
@@ -186,7 +192,9 @@ router.get('/listByStoreId', (req, res) => {
     } else if (type / 1 === 2 && storeId) {
         db.Store.findOne({where: {id: storeId}}).then(store => {
             if (store) {
-                res.json({ok: 1, goodsList: store.getGoods()})
+                store.getGoods().then(goodsList => {
+                    res.json({ok: 1, goodsList})
+                });
             } else {
                 res.json({ok: -1, msg: '商店不存在'})
             }
@@ -211,15 +219,17 @@ router.get('/listAll', (req, res) => {
  */
 router.get('/listByGoodsTypeId', (req, res) => {
     if (req.query.goodsTypeId) {
-        db.GoodsType.findOne({where:{id:req.query.goodsTypeId}}).then(goodsType=>{
+        db.GoodsType.findOne({where: {id: req.query.goodsTypeId}}).then(goodsType => {
             if (goodsType) {
-                res.json({ok:1,goodsList:goodsType.getGoods(),msg:'获取全平台某类商品'})
-            }else {
-                res.json({ok:-1,msg:'无此分类'})
+                goodsType.getGoods().then(goodsList => {
+                    res.json({ok: 1, goodsList, msg: '获取全平台某类商品'})
+                });
+            } else {
+                res.json({ok: -1, msg: '无此分类'})
             }
         })
-    }else {
-        res.json({ok:-1,msg:'缺少goodsTypeId'})
+    } else {
+        res.json({ok: -1, msg: '缺少goodsTypeId'})
     }
 });
 
