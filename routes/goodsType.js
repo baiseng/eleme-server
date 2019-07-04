@@ -1,5 +1,7 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const db = require('../models/table');
+
 
 //根拦截器
 router.all('*',(req,res,next)=>{
@@ -32,20 +34,20 @@ router.post('/',(req,res)=>{
 //删除分类
 router.delete('/',(req,res)=>{
   res.json({
-    ok:1,msg:'此接口不对外开放'
+    ok:1,msg:'此接口不对外开放,仅运维操作'
   })
 });
 
 //修改分类
 router.put('/',(req,res)=>{
   res.json({
-    ok:1,msg:'此接口不对外开放'
+    ok:1,msg:'此接口不对外开放，仅运维操作'
   })
 });
 
 //获取分类列表
 router.get('/list',(req,res)=>{
-  db.goodsType.findAll().then(goodsTypeList=>{
+  db.GoodsType.findAll().then(goodsTypeList=>{
     res.json({ok:1,goodsTypeList})
   })
 });
